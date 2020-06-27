@@ -1,8 +1,8 @@
 package de.marskuh.internetmarke.endpoints.prodws;
 
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.message.WSSecHeader;
-import org.apache.ws.security.message.WSSecUsernameToken;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.message.WSSecHeader;
+import org.apache.wss4j.dom.message.WSSecUsernameToken;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
@@ -33,13 +33,13 @@ public class WSSecurityHeaderSOAPHandler implements SOAPHandler<SOAPMessageConte
                 soapMessage.removeAllAttachments();
 
                 SOAPPart soappart = soapMessage.getSOAPPart();
-                WSSecHeader wsSecHeader = new WSSecHeader();
-                wsSecHeader.insertSecurityHeader(soappart);
-                WSSecUsernameToken token = new WSSecUsernameToken();
+                WSSecHeader wsSecHeader = new WSSecHeader(soappart.getEnvelope().getHeader().getOwnerDocument());
+                wsSecHeader.insertSecurityHeader();
+                WSSecUsernameToken token = new WSSecUsernameToken(wsSecHeader);
                 token.setPasswordsAreEncoded(true);
                 token.setPasswordType(WSConstants.PASSWORD_TEXT);
                 token.setUserInfo(usernameText, passwordText);
-                token.build(soappart, wsSecHeader);
+                token.build();
                 soapMessage.saveChanges();
             } catch (Exception e) {
                 throw new RuntimeException("Error on wsSecurityHandler: " + e.getMessage());
